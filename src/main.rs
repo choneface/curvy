@@ -45,15 +45,14 @@ fn main() {
                     )
                     .unwrap();
 
+                let width = size.width;
+                let height = size.height;
+                println!("window size: width={width}, height={height}");
                 let mut buffer = surface.buffer_mut().unwrap();
-                for index in 0..(buffer.width().get() * buffer.height().get()) {
-                    let y = index / buffer.width().get();
-                    let x = index % buffer.width().get();
-                    let red = x % 255;
-                    let green = y % 255;
-                    let blue = (x * y) % 255;
-
-                    buffer[index as usize] = blue | (green << 8) | (red << 16);
+                for (x, y, pixel) in background.image.enumerate_pixels() {
+                    let [red, blue, green] = pixel.0;
+                    let index = (y as usize * width as usize) + x as usize;
+                    buffer[index as usize] = (green as u32) | (blue as u32) << 8 | (red as u32) << 16;
                 }
 
                 buffer.present().unwrap();
