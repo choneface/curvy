@@ -1,5 +1,5 @@
 use curvy::{
-    run, App, Button, Container, ImageWidget, Rect, RunConfig, UiTree, View, Widget,
+    run, App, Button, Container, Rect, RunConfig, UiTree, View, Widget,
     WidgetEvent,
 };
 use winit::event::WindowEvent;
@@ -12,15 +12,12 @@ impl DemoApp {
     fn new() -> Self {
         let mut tree = UiTree::new();
 
-        // Create a container as root
-        let root = tree.add(Container::new(640, 480).with_background(0x1a1a2e), None);
-        tree.set_bounds(root, Rect::new(0, 0, 640, 480));
-
-        // Add an image
-        let image = ImageWidget::from_file("src/image.ppm").expect("Failed to load image");
-        let (img_w, img_h) = image.preferred_size();
-        let image_id = tree.add(image, Some(root));
-        tree.set_bounds(image_id, Rect::new(20, 20, img_w, img_h));
+        // Create a container with an image background
+        let root_container =
+            Container::from_image("src/image.ppm").expect("Failed to load background image");
+        let (root_w, root_h) = root_container.preferred_size();
+        let root = tree.add(root_container, None);
+        tree.set_bounds(root, Rect::new(0, 0, root_w, root_h));
 
         // Add a button
         let button = Button::new(100, 40)
@@ -72,12 +69,5 @@ impl App for DemoApp {
 fn main() {
     let app = DemoApp::new();
 
-    run(
-        app,
-        RunConfig {
-            width: 900,
-            height: 1480,
-            resizable: false,
-        },
-    );
+    run(app, RunConfig::default());
 }

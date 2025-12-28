@@ -102,28 +102,27 @@ impl<A: App> ApplicationHandler for WinitHandler<A> {
 
 /// Configuration for running an application.
 pub struct RunConfig {
-    pub width: u32,
-    pub height: u32,
     pub resizable: bool,
 }
 
 impl Default for RunConfig {
     fn default() -> Self {
         Self {
-            width: 800,
-            height: 600,
-            resizable: true,
+            resizable: false,
         }
     }
 }
 
 /// Run an application with the given configuration.
+/// The window size is determined by the app's view size.
 pub fn run<A: App + 'static>(app: A, config: RunConfig) {
     let event_loop = EventLoop::new().expect("Failed to create event loop");
     let context = softbuffer::Context::new(event_loop.owned_display_handle())
         .expect("Failed to create softbuffer context");
 
-    let size = PhysicalSize::new(config.width, config.height);
+    // Get the size from the app's view
+    let (width, height) = app.view().size();
+    let size = PhysicalSize::new(width, height);
     let mut handler = WinitHandler::new(app, context, size, config.resizable);
 
     event_loop.run_app(&mut handler).expect("Event loop failed");
