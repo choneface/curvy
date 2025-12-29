@@ -1,37 +1,25 @@
-use curvy::{
-    run, App, Button, Container, Rect, RunConfig, UiTree, View, Widget,
-    WidgetEvent,
-};
+use std::path::Path;
+
+use curvy::{run, App, LoadedSkin, RunConfig, SkinBuilder, UiTree, View, WidgetEvent};
 use winit::event::WindowEvent;
 
-struct DemoApp {
+struct SkinApp {
     tree: UiTree,
 }
 
-impl DemoApp {
-    fn new() -> Self {
-        let mut tree = UiTree::new();
+impl SkinApp {
+    fn new() -> Result<Self, Box<dyn std::error::Error>> {
+        // Load skin from directory
+        let skin = LoadedSkin::load(Path::new("skins/classic/skin.toml"))?;
 
-        // Create a container with an image background
-        let root_container =
-            Container::from_image("src/image.ppm").expect("Failed to load background image");
-        let (root_w, root_h) = root_container.preferred_size();
-        let root = tree.add(root_container, None);
-        tree.set_bounds(root, Rect::new(0, 0, root_w, root_h));
+        // Build UI tree from skin
+        let (tree, _window_config) = SkinBuilder::build(&skin)?;
 
-        // Add a button
-        let button = Button::new(100, 40)
-            .with_color(0x4a4e69)
-            .with_hover_color(0x9a8c98)
-            .with_pressed_color(0x22223b);
-        let button_id = tree.add(button, Some(root));
-        tree.set_bounds(button_id, Rect::new(20, 420, 100, 40));
-
-        Self { tree }
+        Ok(Self { tree })
     }
 }
 
-impl App for DemoApp {
+impl App for SkinApp {
     fn view(&self) -> &dyn View {
         &self.tree
     }
@@ -67,7 +55,7 @@ impl App for DemoApp {
 }
 
 fn main() {
-    let app = DemoApp::new();
+    let app = SkinApp::new().expect("Failed to load skin");
 
     run(app, RunConfig::default());
 }

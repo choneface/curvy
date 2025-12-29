@@ -28,7 +28,12 @@ impl UiTree {
     /// Add a widget to the tree, optionally as a child of another node.
     /// If parent is None and there's no root, this becomes the root.
     pub fn add(&mut self, widget: impl Widget + 'static, parent: Option<NodeId>) -> NodeId {
-        let node = Node::new(Box::new(widget));
+        self.add_boxed(Box::new(widget), parent)
+    }
+
+    /// Add a boxed widget to the tree.
+    pub fn add_boxed(&mut self, widget: Box<dyn Widget>, parent: Option<NodeId>) -> NodeId {
+        let node = Node::new(widget);
         let id = self.allocate_slot(node);
 
         if let Some(parent_id) = parent {
