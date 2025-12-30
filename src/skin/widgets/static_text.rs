@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::core::{Rect, Widget, WidgetEvent, WidgetState};
 use crate::graphics::{
     caret_x_sized, draw_text_sized, line_height_sized, Canvas, TextStyle,
@@ -5,6 +7,7 @@ use crate::graphics::{
 use crate::skin::types::{TextAlign, VerticalAlign};
 
 /// A static text widget for displaying non-editable text.
+/// Can be bound to a Store key to display dynamic values.
 pub struct StaticText {
     /// The text content to display.
     content: String,
@@ -18,6 +21,8 @@ pub struct StaticText {
     vertical_align: VerticalAlign,
     /// Padding from edges.
     padding: u32,
+    /// Store binding key for reading values.
+    binding: Option<String>,
 }
 
 impl StaticText {
@@ -30,6 +35,7 @@ impl StaticText {
             text_align: TextAlign::Left,
             vertical_align: VerticalAlign::Center,
             padding: 0,
+            binding: None,
         }
     }
 
@@ -61,6 +67,17 @@ impl StaticText {
     pub fn with_padding(mut self, padding: u32) -> Self {
         self.padding = padding;
         self
+    }
+
+    /// Set the store binding key.
+    pub fn with_binding(mut self, binding: String) -> Self {
+        self.binding = Some(binding);
+        self
+    }
+
+    /// Get the binding key.
+    pub fn binding(&self) -> Option<&str> {
+        self.binding.as_deref()
     }
 
     /// Get the text content.
@@ -134,5 +151,13 @@ impl Widget for StaticText {
 
     fn on_event(&mut self, _event: &WidgetEvent) -> bool {
         false // Static text doesn't handle events
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }

@@ -109,6 +109,9 @@ impl SkinBuilder {
                 if let Some(validation) = &part.validation {
                     text_input = text_input.with_validation(validation.clone());
                 }
+                if let Some(binding) = &part.binding {
+                    text_input = text_input.with_binding(binding.clone());
+                }
 
                 Ok(Box::new(text_input))
             }
@@ -130,6 +133,9 @@ impl SkinBuilder {
                 }
                 if let Some(padding) = part.padding {
                     static_text = static_text.with_padding(padding);
+                }
+                if let Some(binding) = &part.binding {
+                    static_text = static_text.with_binding(binding.clone());
                 }
 
                 Ok(Box::new(static_text))

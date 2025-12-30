@@ -116,6 +116,8 @@ pub struct SkinPart {
     pub text_align: Option<TextAlign>,
     /// Vertical text alignment
     pub vertical_align: Option<VerticalAlign>,
+    /// Store binding key for reading/writing values
+    pub binding: Option<String>,
 }
 
 /// The root skin structure parsed from skin.toml.

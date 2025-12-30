@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use image::{ImageReader, RgbImage};
 
 use crate::core::{Rect, Widget, WidgetState};
@@ -104,5 +106,13 @@ impl Widget for Container {
 
     fn preferred_size(&self) -> (u32, u32) {
         (self.width, self.height)
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }

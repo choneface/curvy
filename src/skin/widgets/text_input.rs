@@ -1,5 +1,7 @@
-use image::RgbImage;
+use std::any::Any;
 use std::time::Instant;
+
+use image::RgbImage;
 
 use crate::core::{KeyCode, Rect, Widget, WidgetEvent, WidgetState};
 use crate::graphics::{
@@ -50,6 +52,10 @@ pub struct TextInput {
     on_change_action: Option<String>,
     /// Action to emit on submit (Enter).
     on_submit_action: Option<String>,
+    /// Store binding key for syncing value.
+    binding: Option<String>,
+    /// Flag indicating the text was modified since last sync.
+    dirty: bool,
 }
 
 impl TextInput {
@@ -82,6 +88,8 @@ impl TextInput {
             last_blink: Instant::now(),
             on_change_action: None,
             on_submit_action: None,
+            binding: None,
+            dirty: false,
         }
     }
 
@@ -131,6 +139,27 @@ impl TextInput {
     pub fn with_validation(mut self, validation: TextValidation) -> Self {
         self.validation = validation;
         self
+    }
+
+    /// Set the store binding key.
+    pub fn with_binding(mut self, binding: String) -> Self {
+        self.binding = Some(binding);
+        self
+    }
+
+    /// Get the binding key.
+    pub fn binding(&self) -> Option<&str> {
+        self.binding.as_deref()
+    }
+
+    /// Check if the text has been modified since last sync.
+    pub fn is_dirty(&self) -> bool {
+        self.dirty
+    }
+
+    /// Clear the dirty flag (call after syncing to store).
+    pub fn clear_dirty(&mut self) {
+        self.dirty = false;
     }
 
     /// Get the effective font size (custom or global).
@@ -210,6 +239,7 @@ impl TextInput {
 
         self.text.insert(self.cursor, c);
         self.cursor += 1;
+        self.dirty = true;
         self.reset_blink();
         true
     }
@@ -220,6 +250,7 @@ impl TextInput {
         if self.cursor > 0 {
             self.cursor -= 1;
             self.text.remove(self.cursor);
+            self.dirty = true;
             self.reset_blink();
             return true;
         }
@@ -231,6 +262,7 @@ impl TextInput {
     fn delete(&mut self) -> bool {
         if self.cursor < self.text.len() {
             self.text.remove(self.cursor);
+            self.dirty = true;
             self.reset_blink();
             return true;
         }
@@ -449,5 +481,13 @@ impl Widget for TextInput {
             }
             _ => false,
         }
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }

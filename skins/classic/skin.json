@@ -1,6 +1,6 @@
 {
   "skin": {
-    "name": "Demo Skinned Application",
+    "name": "Blend Calculator",
     "author": "choneface",
     "version": "0.1"
   },
@@ -48,17 +48,30 @@
       "vertical_align": "center"
     },
     {
-      "id": "value_a",
-      "type": "text_input",
+      "id": "current_ethanol_label",
+      "type": "static_text",
       "x": 20,
       "y": 140,
+      "width": 520,
+      "height": 30,
+      "z": 10,
+      "content": "Current Ethanol %",
+      "font_size": 24.0,
+      "text_color": "0xFFFFFF",
+      "text_align": "left"
+    },
+    {
+      "id": "current_ethanol_input",
+      "type": "text_input",
+      "x": 20,
+      "y": 175,
       "width": 520,
       "height": 60,
       "font_size": 52.0,
       "max_length": 3,
-      "validation": "numeric",
+      "validation": "0123456789",
       "z": 10,
-      "action": "value_a_changed",
+      "binding": "inputs.current_ethanol_pct",
       "text_color": "0x000000",
       "padding": 4,
       "text_input_draw": {
@@ -72,17 +85,67 @@
       }
     },
     {
-      "id": "value_b",
+      "id": "target_ethanol_label",
+      "type": "static_text",
+      "x": 20,
+      "y": 255,
+      "width": 520,
+      "height": 30,
+      "z": 10,
+      "content": "Target Ethanol %",
+      "font_size": 24.0,
+      "text_color": "0xFFFFFF",
+      "text_align": "left"
+    },
+    {
+      "id": "target_ethanol_input",
       "type": "text_input",
       "x": 20,
-      "y": 220,
+      "y": 290,
       "width": 520,
       "height": 60,
       "font_size": 52.0,
       "max_length": 3,
-      "validation": "numeric",
+      "validation": "0123456789",
       "z": 10,
-      "action": "value_b_changed",
+      "binding": "inputs.target_ethanol_pct",
+      "text_color": "0x000000",
+      "padding": 4,
+      "text_input_draw": {
+        "normal": "input_normal",
+        "hover": "input_hover",
+        "focused": "input_focused",
+        "invalid": "input_invalid"
+      },
+      "hit": {
+        "type": "rect"
+      }
+    },
+    {
+      "id": "current_fuel_label",
+      "type": "static_text",
+      "x": 20,
+      "y": 370,
+      "width": 520,
+      "height": 30,
+      "z": 10,
+      "content": "Current Fuel (liters)",
+      "font_size": 24.0,
+      "text_color": "0xFFFFFF",
+      "text_align": "left"
+    },
+    {
+      "id": "current_fuel_input",
+      "type": "text_input",
+      "x": 20,
+      "y": 405,
+      "width": 520,
+      "height": 60,
+      "font_size": 52.0,
+      "max_length": 5,
+      "validation": "0123456789.",
+      "z": 10,
+      "binding": "inputs.current_fuel_liters",
       "text_color": "0x000000",
       "padding": 4,
       "text_input_draw": {
@@ -98,12 +161,12 @@
     {
       "id": "calculate_button",
       "type": "button",
-      "x": 110,
+      "x": 20,
       "y": 500,
       "width": 80,
       "height": 24,
       "z": 10,
-      "action": "calculate",
+      "action": "calculate_blend",
       "draw": {
         "normal": "calc_normal",
         "hover": "calc_hover",
@@ -112,6 +175,33 @@
       "hit": {
         "type": "rect"
       }
+    },
+    {
+      "id": "result_label",
+      "type": "static_text",
+      "x": 20,
+      "y": 560,
+      "width": 520,
+      "height": 30,
+      "z": 10,
+      "content": "E85 to Add (liters)",
+      "font_size": 24.0,
+      "text_color": "0xFFFFFF",
+      "text_align": "left"
+    },
+    {
+      "id": "result_output",
+      "type": "static_text",
+      "x": 20,
+      "y": 595,
+      "width": 520,
+      "height": 80,
+      "z": 10,
+      "content": "---",
+      "font_size": 64.0,
+      "text_color": "0x00FF00",
+      "text_align": "left",
+      "binding": "outputs.e85_to_add_liters"
     }
   ]
 }

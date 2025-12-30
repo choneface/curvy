@@ -69,6 +69,8 @@ struct SkinPartJson {
     text_align: Option<String>,
     #[serde(default)]
     vertical_align: Option<String>,
+    #[serde(default)]
+    binding: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -209,6 +211,7 @@ impl Skin {
             content: p.content,
             text_align,
             vertical_align,
+            binding: p.binding,
         })
     }
 }

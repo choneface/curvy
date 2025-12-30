@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::core::Rect;
 use crate::graphics::Canvas;
 
@@ -50,4 +52,10 @@ pub trait Widget {
     fn on_event(&mut self, _event: &WidgetEvent) -> bool {
         false
     }
+
+    /// Return self as Any for downcasting.
+    fn as_any(&self) -> &dyn Any;
+
+    /// Return self as mutable Any for downcasting.
+    fn as_any_mut(&mut self) -> &mut dyn Any;
 }

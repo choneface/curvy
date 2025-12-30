@@ -164,6 +164,14 @@ impl UiTree {
         self.captured = id;
     }
 
+    /// Iterate over all valid node IDs.
+    pub fn iter_node_ids(&self) -> impl Iterator<Item = NodeId> + '_ {
+        self.nodes
+            .iter()
+            .enumerate()
+            .filter_map(|(i, n)| n.as_ref().map(|_| NodeId(i)))
+    }
+
     /// Hit test: find the topmost (deepest) node at the given position.
     /// Children are tested before parents (front-to-back).
     pub fn hit_test(&self, x: i32, y: i32) -> Option<NodeId> {

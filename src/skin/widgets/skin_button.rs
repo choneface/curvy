@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use image::RgbImage;
 
 use crate::core::{Rect, Widget, WidgetEvent, WidgetState};
@@ -79,5 +81,13 @@ impl Widget for SkinButton {
             return true;
         }
         false
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }
