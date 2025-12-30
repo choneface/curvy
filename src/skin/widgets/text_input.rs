@@ -2,7 +2,11 @@ use image::RgbImage;
 use std::time::Instant;
 
 use crate::core::{KeyCode, Rect, Widget, WidgetEvent, WidgetState};
-use crate::graphics::{caret_x, draw_caret, draw_text, line_height, Canvas, TextStyle};
+use crate::graphics::{
+    caret_x_sized, draw_caret, draw_text_sized,
+    line_height_sized, Canvas, TextStyle,
+};
+use crate::skin::types::TextValidation;
 
 /// A text input widget for editable single-line text.
 ///
@@ -31,6 +35,12 @@ pub struct TextInput {
     text_color: u32,
     /// Caret color.
     caret_color: u32,
+    /// Custom font size (uses global if None).
+    font_size: Option<f32>,
+    /// Maximum number of characters allowed.
+    max_length: Option<u32>,
+    /// Character validation mode.
+    validation: TextValidation,
     /// Whether the input is currently marked as invalid.
     is_invalid: bool,
     /// Caret blink timing.
@@ -64,6 +74,9 @@ impl TextInput {
             padding: 4,
             text_color: 0x000000, // Black text
             caret_color: 0x000000,
+            font_size: None,
+            max_length: None,
+            validation: TextValidation::Any,
             is_invalid: false,
             caret_visible: true,
             last_blink: Instant::now(),
@@ -102,6 +115,33 @@ impl TextInput {
         self
     }
 
+    /// Set the font size.
+    pub fn with_font_size(mut self, size: f32) -> Self {
+        self.font_size = Some(size);
+        self
+    }
+
+    /// Set the maximum length.
+    pub fn with_max_length(mut self, max: u32) -> Self {
+        self.max_length = Some(max);
+        self
+    }
+
+    /// Set the validation mode.
+    pub fn with_validation(mut self, validation: TextValidation) -> Self {
+        self.validation = validation;
+        self
+    }
+
+    /// Get the effective font size (custom or global).
+    fn effective_font_size(&self) -> f32 {
+        self.font_size.unwrap_or_else(|| {
+            // Use global font size - we need to get it from the text module
+            // For now, default to 16.0 if no custom size
+            16.0
+        })
+    }
+
     /// Get the current text value.
     pub fn text(&self) -> &str {
         &self.text
@@ -133,17 +173,45 @@ impl TextInput {
         self.on_submit_action.as_deref()
     }
 
+    /// Check if a character passes validation.
+    fn validate_char(&self, c: char) -> bool {
+        // First check printable ASCII
+        if (c as u32) < 32 || (c as u32) > 126 {
+            return false;
+        }
+
+        match &self.validation {
+            TextValidation::Any => true,
+            TextValidation::Numeric => c.is_ascii_digit(),
+            TextValidation::Alpha => c.is_ascii_alphabetic(),
+            TextValidation::Alphanumeric => c.is_ascii_alphanumeric(),
+            TextValidation::Pattern(pattern) => {
+                // Pattern is treated as a character whitelist
+                // e.g., "0123456789." allows digits and decimal point
+                pattern.contains(c)
+            }
+        }
+    }
+
     /// Insert a character at the cursor position.
     /// Returns true if the text was modified.
     fn insert_char(&mut self, c: char) -> bool {
-        // Only accept printable ASCII
-        if c as u32 >= 32 && c as u32 <= 126 {
-            self.text.insert(self.cursor, c);
-            self.cursor += 1;
-            self.reset_blink();
-            return true;
+        // Check max length
+        if let Some(max) = self.max_length {
+            if self.text.len() >= max as usize {
+                return false;
+            }
         }
-        false
+
+        // Validate character
+        if !self.validate_char(c) {
+            return false;
+        }
+
+        self.text.insert(self.cursor, c);
+        self.cursor += 1;
+        self.reset_blink();
+        true
     }
 
     /// Delete the character before the cursor (backspace).
@@ -217,13 +285,14 @@ impl TextInput {
     #[allow(dead_code)]
     fn set_cursor_from_x(&mut self, click_x: i32, text_start_x: i32) {
         let relative_x = (click_x - text_start_x).max(0) as u32;
+        let size = self.effective_font_size();
 
         // Find the character position closest to the click
         let mut best_pos = 0;
         let mut best_dist = relative_x;
 
         for i in 0..=self.text.len() {
-            let char_x = caret_x(&self.text, i);
+            let char_x = caret_x_sized(&self.text, i, size);
             let dist = if char_x > relative_x {
                 char_x - relative_x
             } else {
@@ -278,28 +347,33 @@ impl Widget for TextInput {
             bounds.height.saturating_sub(self.padding * 2),
         );
 
+        // Get font size (custom or global)
+        let font_size = self.effective_font_size();
+        let text_height = line_height_sized(font_size);
+
         // Center text vertically
-        let text_y = content_rect.y + (content_rect.height as i32 - line_height() as i32) / 2;
+        let text_y = content_rect.y + (content_rect.height as i32 - text_height as i32) / 2;
 
         // Draw text clipped to content rect
-        draw_text(
+        draw_text_sized(
             canvas,
             content_rect.x,
             text_y,
             Some(&content_rect),
             &self.text,
             TextStyle::with_color(self.text_color),
+            font_size,
         );
 
         // Draw caret if focused and visible
         if state.focused && self.caret_visible {
-            let caret_offset = caret_x(&self.text, self.cursor);
+            let caret_offset = caret_x_sized(&self.text, self.cursor, font_size);
             let caret_x_pos = content_rect.x + caret_offset as i32;
             draw_caret(
                 canvas,
                 caret_x_pos,
                 text_y,
-                line_height(),
+                text_height,
                 Some(&content_rect),
                 self.caret_color,
             );

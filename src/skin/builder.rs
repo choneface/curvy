@@ -100,6 +100,15 @@ impl SkinBuilder {
                 if let Some(padding) = part.padding {
                     text_input = text_input.with_padding(padding);
                 }
+                if let Some(size) = part.font_size {
+                    text_input = text_input.with_font_size(size);
+                }
+                if let Some(max) = part.max_length {
+                    text_input = text_input.with_max_length(max);
+                }
+                if let Some(validation) = &part.validation {
+                    text_input = text_input.with_validation(validation.clone());
+                }
 
                 Ok(Box::new(text_input))
             }

@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 use super::types::{
     HitType, PartDraw, PartHit, PartType, Skin, SkinError, SkinMeta, SkinPart, SkinWindow,
-    TextInputDraw,
+    TextInputDraw, TextValidation,
 };
 
 #[derive(Deserialize)]
@@ -57,6 +57,12 @@ struct SkinPartJson {
     text_color: Option<String>,
     #[serde(default)]
     padding: Option<u32>,
+    #[serde(default)]
+    font_size: Option<f32>,
+    #[serde(default)]
+    max_length: Option<u32>,
+    #[serde(default)]
+    validation: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -151,6 +157,15 @@ impl Skin {
             u32::from_str_radix(s, 16).ok()
         });
 
+        // Parse validation mode
+        let validation = p.validation.map(|s| match s.as_str() {
+            "numeric" => TextValidation::Numeric,
+            "alpha" => TextValidation::Alpha,
+            "alphanumeric" => TextValidation::Alphanumeric,
+            "any" => TextValidation::Any,
+            pattern => TextValidation::Pattern(pattern.to_string()),
+        });
+
         Ok(SkinPart {
             id: p.id,
             part_type,
@@ -165,6 +180,9 @@ impl Skin {
             action: p.action,
             text_color,
             padding: p.padding,
+            font_size: p.font_size,
+            max_length: p.max_length,
+            validation,
         })
     }
 }

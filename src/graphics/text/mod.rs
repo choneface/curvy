@@ -35,8 +35,12 @@ fn get_font_size() -> f32 {
 
 /// Get the line height for the current font.
 pub fn line_height() -> u32 {
+    line_height_sized(get_font_size())
+}
+
+/// Get the line height for a specific font size.
+pub fn line_height_sized(size: f32) -> u32 {
     let font = get_font();
-    let size = get_font_size();
     let metrics = font.horizontal_line_metrics(size).unwrap_or(fontdue::LineMetrics {
         ascent: size,
         descent: 0.0,
@@ -84,8 +88,12 @@ pub fn measure_text(text: &str) -> (u32, u32) {
 
 /// Get the x offset of the caret at the given character index.
 pub fn caret_x(text: &str, cursor_index: usize) -> u32 {
+    caret_x_sized(text, cursor_index, get_font_size())
+}
+
+/// Get the x offset of the caret at the given character index with a specific font size.
+pub fn caret_x_sized(text: &str, cursor_index: usize, size: f32) -> u32 {
     let font = get_font();
-    let size = get_font_size();
 
     let mut x = 0.0;
     for (i, c) in text.chars().enumerate() {
@@ -109,8 +117,21 @@ pub fn draw_text(
     text: &str,
     style: TextStyle,
 ) {
+    draw_text_sized(canvas, x, y, clip_rect, text, style, get_font_size())
+}
+
+/// Draw text to the canvas at the given position with a specific font size.
+/// Clips rendering to the optional clip_rect.
+pub fn draw_text_sized(
+    canvas: &mut Canvas,
+    x: i32,
+    y: i32,
+    clip_rect: Option<&Rect>,
+    text: &str,
+    style: TextStyle,
+    size: f32,
+) {
     let font = get_font();
-    let size = get_font_size();
 
     let mut cursor_x = x as f32;
 

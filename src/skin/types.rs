@@ -54,6 +54,21 @@ pub enum PartType {
     TextInput,
 }
 
+/// Validation mode for text input.
+#[derive(Debug, Clone)]
+pub enum TextValidation {
+    /// Any printable ASCII characters (default)
+    Any,
+    /// Digits only (0-9)
+    Numeric,
+    /// Letters only (a-z, A-Z)
+    Alpha,
+    /// Letters and digits
+    Alphanumeric,
+    /// Custom regex pattern
+    Pattern(String),
+}
+
 /// A skin part definition from [[parts]] in TOML.
 #[derive(Debug, Clone)]
 pub struct SkinPart {
@@ -70,6 +85,12 @@ pub struct SkinPart {
     pub action: Option<String>,
     pub text_color: Option<u32>,
     pub padding: Option<u32>,
+    /// Font size in pixels (uses global font size if not specified)
+    pub font_size: Option<f32>,
+    /// Maximum number of characters allowed
+    pub max_length: Option<u32>,
+    /// Character validation mode
+    pub validation: Option<TextValidation>,
 }
 
 /// The root skin structure parsed from skin.toml.
