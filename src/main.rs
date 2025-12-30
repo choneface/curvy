@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use curvy::{
+use crix::{
     run, init_font, Action, ActionDispatcher, App, AppBundle, KeyCode,
     LuaActionHandler, RunConfig, Services, SkinBuilder, StaticText,
     Store, TextInput, UiTree, View, WidgetEvent,
@@ -9,10 +9,10 @@ use curvy::{
 use winit::event::WindowEvent;
 use winit::keyboard::{Key, NamedKey};
 
-/// Curvy - A skinnable UI framework
+/// Crix - A skinnable UI framework
 #[derive(Parser)]
-#[command(name = "curvy")]
-#[command(about = "Run curvy application bundles", long_about = None)]
+#[command(name = "crix")]
+#[command(about = "Run crix application bundles", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -20,9 +20,9 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Run a curvy application bundle
+    /// Run a crix application bundle
     Run {
-        /// Path to the .curvy bundle directory
+        /// Path to the .crix bundle directory
         bundle: PathBuf,
     },
 }
@@ -122,10 +122,10 @@ impl SkinApp {
     }
 
     /// Get the action for a clicked widget (if it's a button).
-    fn get_button_action(&self, node_id: curvy::NodeId) -> Option<String> {
+    fn get_button_action(&self, node_id: crix::NodeId) -> Option<String> {
         if let Some(node) = self.tree.get(node_id) {
             // Try to get the action from a SkinButton
-            if let Some(button) = node.widget().as_any().downcast_ref::<curvy::skin::widgets::SkinButton>() {
+            if let Some(button) = node.widget().as_any().downcast_ref::<crix::skin::widgets::SkinButton>() {
                 return button.action().map(|s| s.to_string());
             }
         }

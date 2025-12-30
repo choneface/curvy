@@ -1,4 +1,4 @@
-//! Scripting support for curvy applications.
+//! Scripting support for crix applications.
 //!
 //! This module provides a scripting layer for defining application behavior
 //! without recompiling the Rust code. Scripts live in the app directory

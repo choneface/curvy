@@ -1,10 +1,10 @@
-//! App bundle loading for curvy applications.
+//! App bundle loading for crix applications.
 //!
-//! An app bundle is a self-contained directory with the `.curvy` extension
+//! An app bundle is a self-contained directory with the `.crix` extension
 //! that contains everything needed to run an application:
 //!
 //! ```text
-//! my_app.curvy/
+//! my_app.crix/
 //! ├─ app.toml           # App configuration and metadata
 //! ├─ skin/              # Visual assets
 //! │  ├─ skin.json       # Skin definition

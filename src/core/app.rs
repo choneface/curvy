@@ -2,7 +2,7 @@ use winit::event::WindowEvent;
 
 use crate::core::View;
 
-/// Trait for applications using the Curvy framework.
+/// Trait for applications using the Crix framework.
 pub trait App {
     /// Returns the root view to render.
     fn view(&self) -> &dyn View;

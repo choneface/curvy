@@ -141,7 +141,7 @@ impl AppBundle {
     /// Load an app bundle from a directory.
     ///
     /// # Arguments
-    /// * `path` - Path to the bundle directory (e.g., "my_app.curvy")
+    /// * `path` - Path to the bundle directory (e.g., "my_app.crix")
     ///
     /// # Returns
     /// A loaded AppBundle with all paths resolved and validated.

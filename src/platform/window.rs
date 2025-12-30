@@ -113,7 +113,7 @@ impl Default for RunConfig {
     fn default() -> Self {
         Self {
             resizable: false,
-            title: String::from("Curvy"),
+            title: String::from("Crix"),
         }
     }
 }
