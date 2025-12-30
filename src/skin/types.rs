@@ -46,12 +46,31 @@ pub enum HitType {
     Rect,
 }
 
+/// Horizontal text alignment.
+#[derive(Debug, Clone, Copy, Default)]
+pub enum TextAlign {
+    #[default]
+    Left,
+    Center,
+    Right,
+}
+
+/// Vertical text alignment.
+#[derive(Debug, Clone, Copy, Default)]
+pub enum VerticalAlign {
+    Top,
+    #[default]
+    Center,
+    Bottom,
+}
+
 /// Part type discriminator.
 #[derive(Debug, Clone)]
 pub enum PartType {
     Image { asset: String },
     Button,
     TextInput,
+    StaticText,
 }
 
 /// Validation mode for text input.
@@ -91,6 +110,12 @@ pub struct SkinPart {
     pub max_length: Option<u32>,
     /// Character validation mode
     pub validation: Option<TextValidation>,
+    /// Static text content
+    pub content: Option<String>,
+    /// Horizontal text alignment
+    pub text_align: Option<TextAlign>,
+    /// Vertical text alignment
+    pub vertical_align: Option<VerticalAlign>,
 }
 
 /// The root skin structure parsed from skin.toml.

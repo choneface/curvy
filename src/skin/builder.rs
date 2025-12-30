@@ -3,7 +3,7 @@ use crate::widgets::Container;
 
 use super::assets::LoadedSkin;
 use super::types::{PartType, SkinError, SkinPart, SkinWindow};
-use super::widgets::{SkinButton, SkinImage, TextInput};
+use super::widgets::{SkinButton, SkinImage, StaticText, TextInput};
 
 /// Builds a UiTree from a loaded skin.
 pub struct SkinBuilder;
@@ -111,6 +111,28 @@ impl SkinBuilder {
                 }
 
                 Ok(Box::new(text_input))
+            }
+            PartType::StaticText => {
+                let content = part.content.clone().unwrap_or_default();
+                let mut static_text = StaticText::new(content);
+
+                if let Some(size) = part.font_size {
+                    static_text = static_text.with_font_size(size);
+                }
+                if let Some(color) = part.text_color {
+                    static_text = static_text.with_text_color(color);
+                }
+                if let Some(align) = part.text_align {
+                    static_text = static_text.with_text_align(align);
+                }
+                if let Some(valign) = part.vertical_align {
+                    static_text = static_text.with_vertical_align(valign);
+                }
+                if let Some(padding) = part.padding {
+                    static_text = static_text.with_padding(padding);
+                }
+
+                Ok(Box::new(static_text))
             }
         }
     }

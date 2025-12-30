@@ -8,5 +8,5 @@ pub mod widgets;
 pub use core::{App, AppRunner, KeyCode, Node, NodeId, Rect, UiTree, View, Widget, WidgetEvent, WidgetState};
 pub use graphics::{Canvas, Image, init_font, FontError};
 pub use platform::{run, RunConfig};
-pub use skin::{LoadedSkin, SkinBuilder, SkinError, SkinWindow, TextInput};
+pub use skin::{LoadedSkin, SkinBuilder, SkinError, SkinWindow, StaticText, TextAlign, TextInput, VerticalAlign};
 pub use widgets::{Button, Container, ImageWidget};

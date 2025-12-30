@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 use super::types::{
     HitType, PartDraw, PartHit, PartType, Skin, SkinError, SkinMeta, SkinPart, SkinWindow,
-    TextInputDraw, TextValidation,
+    TextAlign, TextInputDraw, TextValidation, VerticalAlign,
 };
 
 #[derive(Deserialize)]
@@ -63,6 +63,12 @@ struct SkinPartJson {
     max_length: Option<u32>,
     #[serde(default)]
     validation: Option<String>,
+    #[serde(default)]
+    content: Option<String>,
+    #[serde(default)]
+    text_align: Option<String>,
+    #[serde(default)]
+    vertical_align: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -129,6 +135,7 @@ impl Skin {
             }
             "button" => PartType::Button,
             "text_input" => PartType::TextInput,
+            "static_text" => PartType::StaticText,
             other => return Err(SkinError::InvalidPartType(other.to_string())),
         };
 
@@ -166,6 +173,22 @@ impl Skin {
             pattern => TextValidation::Pattern(pattern.to_string()),
         });
 
+        // Parse text alignment
+        let text_align = p.text_align.map(|s| match s.as_str() {
+            "left" => TextAlign::Left,
+            "center" => TextAlign::Center,
+            "right" => TextAlign::Right,
+            _ => TextAlign::Left,
+        });
+
+        // Parse vertical alignment
+        let vertical_align = p.vertical_align.map(|s| match s.as_str() {
+            "top" => VerticalAlign::Top,
+            "center" => VerticalAlign::Center,
+            "bottom" => VerticalAlign::Bottom,
+            _ => VerticalAlign::Center,
+        });
+
         Ok(SkinPart {
             id: p.id,
             part_type,
@@ -183,6 +206,9 @@ impl Skin {
             font_size: p.font_size,
             max_length: p.max_length,
             validation,
+            content: p.content,
+            text_align,
+            vertical_align,
         })
     }
 }
