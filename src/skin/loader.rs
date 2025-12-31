@@ -4,8 +4,8 @@ use std::path::Path;
 use serde::Deserialize;
 
 use super::types::{
-    HitType, PartDraw, PartHit, PartType, Skin, SkinError, SkinMeta, SkinPart, SkinWindow,
-    TextAlign, TextInputDraw, TextValidation, VerticalAlign,
+    HitType, PartDraw, PartHit, PartType, ScrollbarDraw, Skin, SkinError, SkinMeta, SkinPart,
+    SkinWindow, TextAlign, TextInputDraw, TextValidation, VerticalAlign,
 };
 
 #[derive(Deserialize)]
@@ -52,6 +52,8 @@ struct SkinPartJson {
     #[serde(default)]
     text_input_draw: Option<TextInputDrawJson>,
     #[serde(default)]
+    scrollbar: Option<ScrollbarDrawJson>,
+    #[serde(default)]
     hit: Option<PartHitJson>,
     #[serde(default)]
     text_color: Option<String>,
@@ -71,6 +73,10 @@ struct SkinPartJson {
     vertical_align: Option<String>,
     #[serde(default)]
     binding: Option<String>,
+    #[serde(default)]
+    content_height: Option<u32>,
+    #[serde(default)]
+    child: Option<Box<SkinPartJson>>,
 }
 
 #[derive(Deserialize)]
@@ -87,6 +93,13 @@ struct TextInputDrawJson {
     focused: String,
     #[serde(default)]
     invalid: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct ScrollbarDrawJson {
+    width: u32,
+    track: String,
+    thumb: String,
 }
 
 #[derive(Deserialize)]
@@ -138,6 +151,7 @@ impl Skin {
             "button" => PartType::Button,
             "text_input" => PartType::TextInput,
             "static_text" => PartType::StaticText,
+            "vscroll_container" => PartType::VScrollContainer,
             other => return Err(SkinError::InvalidPartType(other.to_string())),
         };
 
@@ -152,6 +166,12 @@ impl Skin {
             hover: d.hover,
             focused: d.focused,
             invalid: d.invalid,
+        });
+
+        let scrollbar = p.scrollbar.map(|s| ScrollbarDraw {
+            width: s.width,
+            track: s.track,
+            thumb: s.thumb,
         });
 
         let hit = p.hit.map(|h| PartHit {
@@ -191,6 +211,12 @@ impl Skin {
             _ => VerticalAlign::Center,
         });
 
+        // Parse child recursively
+        let child = match p.child {
+            Some(child_json) => Some(Box::new(Self::convert_part(*child_json)?)),
+            None => None,
+        };
+
         Ok(SkinPart {
             id: p.id,
             part_type,
@@ -201,6 +227,7 @@ impl Skin {
             z: p.z,
             draw,
             text_input_draw,
+            scrollbar,
             hit,
             action: p.action,
             text_color,
@@ -212,6 +239,8 @@ impl Skin {
             text_align,
             vertical_align,
             binding: p.binding,
+            content_height: p.content_height,
+            child,
         })
     }
 }

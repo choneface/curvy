@@ -1,14 +1,22 @@
+use crate::core::Rect;
+
 /// A drawing surface that Views render to.
 /// Wraps a mutable pixel buffer with drawing primitives.
 pub struct Canvas<'a> {
     buffer: &'a mut [u32],
     width: u32,
     height: u32,
+    clip_rect: Option<Rect>,
 }
 
 impl<'a> Canvas<'a> {
     pub fn new(buffer: &'a mut [u32], width: u32, height: u32) -> Self {
-        Self { buffer, width, height }
+        Self {
+            buffer,
+            width,
+            height,
+            clip_rect: None,
+        }
     }
 
     pub fn width(&self) -> u32 {
@@ -19,9 +27,31 @@ impl<'a> Canvas<'a> {
         self.height
     }
 
-    /// Set a single pixel. Coordinates outside bounds are ignored.
+    /// Set the clipping rectangle. Only pixels within this rect will be drawn.
+    pub fn set_clip(&mut self, rect: Option<Rect>) {
+        self.clip_rect = rect;
+    }
+
+    /// Get the current clipping rectangle.
+    pub fn clip_rect(&self) -> Option<&Rect> {
+        self.clip_rect.as_ref()
+    }
+
+    /// Check if a pixel is within the clip rect (if set).
+    #[inline]
+    fn is_clipped(&self, x: u32, y: u32) -> bool {
+        if let Some(ref clip) = self.clip_rect {
+            let px = x as i32;
+            let py = y as i32;
+            px < clip.x || px >= clip.right() || py < clip.y || py >= clip.bottom()
+        } else {
+            false
+        }
+    }
+
+    /// Set a single pixel. Coordinates outside bounds or clip rect are ignored.
     pub fn set_pixel(&mut self, x: u32, y: u32, color: u32) {
-        if x < self.width && y < self.height {
+        if x < self.width && y < self.height && !self.is_clipped(x, y) {
             let index = (y * self.width + x) as usize;
             self.buffer[index] = color;
         }
@@ -45,8 +75,10 @@ impl<'a> Canvas<'a> {
 
         for py in y..y_end {
             for px in x..x_end {
-                let index = (py * self.width + px) as usize;
-                self.buffer[index] = color;
+                if !self.is_clipped(px, py) {
+                    let index = (py * self.width + px) as usize;
+                    self.buffer[index] = color;
+                }
             }
         }
     }

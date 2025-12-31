@@ -1,0 +1,18 @@
+# Crix Runner - App launcher for crix applications
+#
+# Run with: crix run crix_runner.crix
+
+[app]
+name = "Crix Runner"
+version = "0.1.0"
+author = "crix"
+
+[skin]
+path = "skin/skin.json"
+
+[fonts]
+default = "skin/font.ttf"
+size = 16.0
+
+[actions]
+# Future: launch_app, refresh_list, etc.

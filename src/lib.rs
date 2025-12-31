@@ -15,5 +15,5 @@ pub use core::{
 pub use graphics::{Canvas, Image, init_font, FontError};
 pub use platform::{run, RunConfig};
 pub use scripting::{AppConfig, AppConfigError, LuaActionHandler, LuaError};
-pub use skin::{LoadedSkin, SkinBuilder, SkinError, SkinWindow, StaticText, TextAlign, TextInput, VerticalAlign};
-pub use widgets::{Button, Container, ImageWidget};
+pub use skin::{LoadedSkin, SkinBuilder, SkinError, SkinVScroll, SkinWindow, StaticText, TextAlign, TextInput, VerticalAlign};
+pub use widgets::{Button, Container, ImageWidget, VScrollContainer};

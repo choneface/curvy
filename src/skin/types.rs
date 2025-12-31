@@ -34,6 +34,14 @@ pub struct TextInputDraw {
     pub invalid: Option<String>,
 }
 
+/// Scrollbar configuration for scroll containers.
+#[derive(Debug, Clone)]
+pub struct ScrollbarDraw {
+    pub width: u32,
+    pub track: String,
+    pub thumb: String,
+}
+
 /// Hit testing configuration.
 #[derive(Debug, Clone)]
 pub struct PartHit {
@@ -71,6 +79,7 @@ pub enum PartType {
     Button,
     TextInput,
     StaticText,
+    VScrollContainer,
 }
 
 /// Validation mode for text input.
@@ -100,6 +109,7 @@ pub struct SkinPart {
     pub z: i32,
     pub draw: Option<PartDraw>,
     pub text_input_draw: Option<TextInputDraw>,
+    pub scrollbar: Option<ScrollbarDraw>,
     pub hit: Option<PartHit>,
     pub action: Option<String>,
     pub text_color: Option<u32>,
@@ -118,6 +128,10 @@ pub struct SkinPart {
     pub vertical_align: Option<VerticalAlign>,
     /// Store binding key for reading/writing values
     pub binding: Option<String>,
+    /// Content height for scroll containers
+    pub content_height: Option<u32>,
+    /// Child widget for containers
+    pub child: Option<Box<SkinPart>>,
 }
 
 /// The root skin structure parsed from skin.toml.

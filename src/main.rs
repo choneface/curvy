@@ -206,6 +206,23 @@ impl App for SkinApp {
                 }
                 true
             }
+            WindowEvent::MouseWheel { delta, .. } => {
+                // Convert delta to pixels (rough approximation)
+                let delta_y = match delta {
+                    winit::event::MouseScrollDelta::LineDelta(_, y) => *y * 20.0,
+                    winit::event::MouseScrollDelta::PixelDelta(pos) => pos.y as f32,
+                };
+
+                // Route to hovered widget
+                if let Some(hovered_id) = self.tree.hovered() {
+                    if let Some(node) = self.tree.get_mut(hovered_id) {
+                        if node.widget_mut().on_event(&WidgetEvent::MouseWheel { delta_y }) {
+                            return true;
+                        }
+                    }
+                }
+                false
+            }
             WindowEvent::KeyboardInput { event, .. } => {
                 if !event.state.is_pressed() {
                     return false;

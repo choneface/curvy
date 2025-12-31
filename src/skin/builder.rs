@@ -3,7 +3,7 @@ use crate::widgets::Container;
 
 use super::assets::LoadedSkin;
 use super::types::{PartType, SkinError, SkinPart, SkinWindow};
-use super::widgets::{SkinButton, SkinImage, StaticText, TextInput};
+use super::widgets::{SkinButton, SkinImage, SkinVScroll, StaticText, TextInput};
 
 /// Builds a UiTree from a loaded skin.
 pub struct SkinBuilder;
@@ -139,6 +139,39 @@ impl SkinBuilder {
                 }
 
                 Ok(Box::new(static_text))
+            }
+            PartType::VScrollContainer => {
+                let scrollbar = part
+                    .scrollbar
+                    .as_ref()
+                    .ok_or_else(|| SkinError::MissingDrawSection(format!("{} (scrollbar)", part.id)))?;
+
+                let track = skin
+                    .get_image(&scrollbar.track)
+                    .ok_or_else(|| SkinError::AssetNotFound(scrollbar.track.clone()))?;
+                let thumb = skin
+                    .get_image(&scrollbar.thumb)
+                    .ok_or_else(|| SkinError::AssetNotFound(scrollbar.thumb.clone()))?;
+
+                let mut scroll = SkinVScroll::new(
+                    part.width,
+                    part.height,
+                    track.clone(),
+                    thumb.clone(),
+                );
+
+                // Set content height if specified
+                if let Some(content_height) = part.content_height {
+                    scroll = scroll.with_content_height(content_height);
+                }
+
+                // Build child widget if present
+                if let Some(ref child_part) = part.child {
+                    let child_widget = Self::create_widget(child_part, skin)?;
+                    scroll = scroll.with_child(child_widget);
+                }
+
+                Ok(Box::new(scroll))
             }
         }
     }

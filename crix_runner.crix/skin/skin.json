@@ -1,0 +1,68 @@
+{
+  "skin": {
+    "name": "Crix Runner",
+    "author": "crix",
+    "version": "1.0.0"
+  },
+  "window": {
+    "width": 400,
+    "height": 600,
+    "resizable": false
+  },
+  "assets": {
+    "background": "images/background.png",
+    "scrollbar_track": "images/scrollbar_track.png",
+    "scrollbar_thumb": "images/scrollbar_thumb.png",
+    "list_item": "images/list_item.png"
+  },
+  "parts": [
+    {
+      "id": "background",
+      "type": "image",
+      "asset": "background",
+      "x": 0,
+      "y": 0,
+      "width": 400,
+      "height": 600,
+      "z": 0
+    },
+    {
+      "id": "title",
+      "type": "static_text",
+      "x": 16,
+      "y": 16,
+      "width": 368,
+      "height": 40,
+      "z": 1,
+      "content": "Crix App Runner",
+      "font_size": 24.0,
+      "text_color": "0xFFFFFF",
+      "text_align": "center"
+    },
+    {
+      "id": "app_list",
+      "type": "vscroll_container",
+      "x": 16,
+      "y": 70,
+      "width": 368,
+      "height": 500,
+      "z": 1,
+      "content_height": 900,
+      "scrollbar": {
+        "width": 16,
+        "track": "scrollbar_track",
+        "thumb": "scrollbar_thumb"
+      },
+      "child": {
+        "id": "list_content",
+        "type": "image",
+        "asset": "list_item",
+        "x": 0,
+        "y": 0,
+        "width": 352,
+        "height": 900,
+        "z": 0
+      }
+    }
+  ]
+}

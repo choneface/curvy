@@ -7,4 +7,4 @@ pub mod widgets;
 pub use assets::LoadedSkin;
 pub use builder::SkinBuilder;
 pub use types::{SkinError, SkinWindow, TextAlign, VerticalAlign};
-pub use widgets::{StaticText, TextInput};
+pub use widgets::{SkinVScroll, StaticText, TextInput};

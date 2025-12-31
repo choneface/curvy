@@ -29,6 +29,7 @@ pub enum WidgetEvent {
     MouseDown { x: i32, y: i32 },
     MouseUp { x: i32, y: i32 },
     MouseMove { x: i32, y: i32 },
+    MouseWheel { delta_y: f32 },
     Click,
     CharInput { c: char },
     KeyDown { key: KeyCode },
