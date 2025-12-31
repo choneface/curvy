@@ -42,6 +42,38 @@ pub struct ScrollbarDraw {
     pub thumb: String,
 }
 
+/// Directory picker drawing configuration.
+#[derive(Debug, Clone)]
+pub struct DirectoryPickerDraw {
+    pub normal: String,
+    pub hover: String,
+    pub button_normal: String,
+    pub button_hover: String,
+}
+
+/// File picker drawing configuration.
+#[derive(Debug, Clone)]
+pub struct FilePickerDraw {
+    /// Picker bar normal state.
+    pub picker_normal: String,
+    /// Picker bar hover state.
+    pub picker_hover: String,
+    /// Picker button normal state.
+    pub picker_btn_normal: String,
+    /// Picker button hover state.
+    pub picker_btn_hover: String,
+    /// Scrollbar track image.
+    pub track: String,
+    /// Scrollbar thumb image.
+    pub thumb: String,
+    /// List item normal state.
+    pub item_normal: String,
+    /// List item hover state.
+    pub item_hover: String,
+    /// List item selected state.
+    pub item_selected: String,
+}
+
 /// Hit testing configuration.
 #[derive(Debug, Clone)]
 pub struct PartHit {
@@ -80,6 +112,8 @@ pub enum PartType {
     TextInput,
     StaticText,
     VScrollContainer,
+    DirectoryPicker,
+    FilePicker,
 }
 
 /// Validation mode for text input.
@@ -109,6 +143,8 @@ pub struct SkinPart {
     pub z: i32,
     pub draw: Option<PartDraw>,
     pub text_input_draw: Option<TextInputDraw>,
+    pub directory_picker_draw: Option<DirectoryPickerDraw>,
+    pub file_picker_draw: Option<FilePickerDraw>,
     pub scrollbar: Option<ScrollbarDraw>,
     pub hit: Option<PartHit>,
     pub action: Option<String>,
@@ -132,6 +168,8 @@ pub struct SkinPart {
     pub content_height: Option<u32>,
     /// Child widget for containers
     pub child: Option<Box<SkinPart>>,
+    /// Filter string for file pickers (e.g., ".crix")
+    pub filter: Option<String>,
 }
 
 /// The root skin structure parsed from skin.toml.

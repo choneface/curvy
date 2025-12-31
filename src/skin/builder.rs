@@ -3,7 +3,7 @@ use crate::widgets::Container;
 
 use super::assets::LoadedSkin;
 use super::types::{PartType, SkinError, SkinPart, SkinWindow};
-use super::widgets::{SkinButton, SkinImage, SkinVScroll, StaticText, TextInput};
+use super::widgets::{DirectoryPicker, FilePicker, SkinButton, SkinImage, SkinVScroll, StaticText, TextInput};
 
 /// Builds a UiTree from a loaded skin.
 pub struct SkinBuilder;
@@ -172,6 +172,110 @@ impl SkinBuilder {
                 }
 
                 Ok(Box::new(scroll))
+            }
+            PartType::DirectoryPicker => {
+                let draw = part
+                    .directory_picker_draw
+                    .as_ref()
+                    .ok_or_else(|| SkinError::MissingDrawSection(part.id.clone()))?;
+
+                let normal = skin
+                    .get_image(&draw.normal)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.normal.clone()))?;
+                let hover = skin
+                    .get_image(&draw.hover)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.hover.clone()))?;
+                let button_normal = skin
+                    .get_image(&draw.button_normal)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.button_normal.clone()))?;
+                let button_hover = skin
+                    .get_image(&draw.button_hover)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.button_hover.clone()))?;
+
+                let mut picker = DirectoryPicker::new(
+                    normal.clone(),
+                    hover.clone(),
+                    button_normal.clone(),
+                    button_hover.clone(),
+                );
+
+                if let Some(color) = part.text_color {
+                    picker = picker.with_text_color(color);
+                }
+                if let Some(padding) = part.padding {
+                    picker = picker.with_padding(padding);
+                }
+                if let Some(size) = part.font_size {
+                    picker = picker.with_font_size(size);
+                }
+                if let Some(binding) = &part.binding {
+                    picker = picker.with_binding(binding.clone());
+                }
+
+                Ok(Box::new(picker))
+            }
+            PartType::FilePicker => {
+                let draw = part
+                    .file_picker_draw
+                    .as_ref()
+                    .ok_or_else(|| SkinError::MissingDrawSection(part.id.clone()))?;
+
+                let picker_normal = skin
+                    .get_image(&draw.picker_normal)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.picker_normal.clone()))?;
+                let picker_hover = skin
+                    .get_image(&draw.picker_hover)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.picker_hover.clone()))?;
+                let picker_btn_normal = skin
+                    .get_image(&draw.picker_btn_normal)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.picker_btn_normal.clone()))?;
+                let picker_btn_hover = skin
+                    .get_image(&draw.picker_btn_hover)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.picker_btn_hover.clone()))?;
+                let track = skin
+                    .get_image(&draw.track)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.track.clone()))?;
+                let thumb = skin
+                    .get_image(&draw.thumb)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.thumb.clone()))?;
+                let item_normal = skin
+                    .get_image(&draw.item_normal)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.item_normal.clone()))?;
+                let item_hover = skin
+                    .get_image(&draw.item_hover)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.item_hover.clone()))?;
+                let item_selected = skin
+                    .get_image(&draw.item_selected)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.item_selected.clone()))?;
+
+                let mut picker = FilePicker::new(
+                    part.width,
+                    part.height,
+                    picker_normal.clone(),
+                    picker_hover.clone(),
+                    picker_btn_normal.clone(),
+                    picker_btn_hover.clone(),
+                    track.clone(),
+                    thumb.clone(),
+                    item_normal.clone(),
+                    item_hover.clone(),
+                    item_selected.clone(),
+                );
+
+                if let Some(ref filter) = part.filter {
+                    picker = picker.with_filter(filter.clone());
+                }
+                if let Some(color) = part.text_color {
+                    picker = picker.with_text_color(color);
+                }
+                if let Some(padding) = part.padding {
+                    picker = picker.with_padding(padding);
+                }
+                if let Some(binding) = &part.binding {
+                    picker = picker.with_binding(binding.clone());
+                }
+
+                Ok(Box::new(picker))
             }
         }
     }

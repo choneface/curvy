@@ -5,15 +5,21 @@
     "version": "1.0.0"
   },
   "window": {
-    "width": 400,
-    "height": 600,
+    "width": 1100,
+    "height": 800,
     "resizable": false
   },
   "assets": {
     "background": "images/background.png",
+    "picker_normal": "images/picker_normal.png",
+    "picker_hover": "images/picker_hover.png",
+    "picker_btn_normal": "images/picker_btn_normal.png",
+    "picker_btn_hover": "images/picker_btn_hover.png",
     "scrollbar_track": "images/scrollbar_track.png",
     "scrollbar_thumb": "images/scrollbar_thumb.png",
-    "list_item": "images/list_item.png"
+    "item_normal": "images/item_normal.png",
+    "item_hover": "images/item_hover.png",
+    "item_selected": "images/item_selected.png"
   },
   "parts": [
     {
@@ -22,8 +28,8 @@
       "asset": "background",
       "x": 0,
       "y": 0,
-      "width": 400,
-      "height": 600,
+      "width": 1100,
+      "height": 800,
       "z": 0
     },
     {
@@ -31,7 +37,7 @@
       "type": "static_text",
       "x": 16,
       "y": 16,
-      "width": 368,
+      "width": 1068,
       "height": 40,
       "z": 1,
       "content": "Crix App Runner",
@@ -40,28 +46,27 @@
       "text_align": "center"
     },
     {
-      "id": "app_list",
-      "type": "vscroll_container",
+      "id": "file_picker",
+      "type": "file_picker",
       "x": 16,
       "y": 70,
-      "width": 368,
-      "height": 500,
+      "width": 1068,
+      "height": 714,
       "z": 1,
-      "content_height": 900,
-      "scrollbar": {
-        "width": 16,
+      "filter": ".crix",
+      "text_color": "0xDDDDDD",
+      "padding": 12,
+      "binding": "selected_app",
+      "file_picker_draw": {
+        "picker_normal": "picker_normal",
+        "picker_hover": "picker_hover",
+        "picker_btn_normal": "picker_btn_normal",
+        "picker_btn_hover": "picker_btn_hover",
         "track": "scrollbar_track",
-        "thumb": "scrollbar_thumb"
-      },
-      "child": {
-        "id": "list_content",
-        "type": "image",
-        "asset": "list_item",
-        "x": 0,
-        "y": 0,
-        "width": 352,
-        "height": 900,
-        "z": 0
+        "thumb": "scrollbar_thumb",
+        "item_normal": "item_normal",
+        "item_hover": "item_hover",
+        "item_selected": "item_selected"
       }
     }
   ]

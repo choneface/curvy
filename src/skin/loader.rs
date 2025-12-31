@@ -4,8 +4,9 @@ use std::path::Path;
 use serde::Deserialize;
 
 use super::types::{
-    HitType, PartDraw, PartHit, PartType, ScrollbarDraw, Skin, SkinError, SkinMeta, SkinPart,
-    SkinWindow, TextAlign, TextInputDraw, TextValidation, VerticalAlign,
+    DirectoryPickerDraw, FilePickerDraw, HitType, PartDraw, PartHit, PartType, ScrollbarDraw,
+    Skin, SkinError, SkinMeta, SkinPart, SkinWindow, TextAlign, TextInputDraw, TextValidation,
+    VerticalAlign,
 };
 
 #[derive(Deserialize)]
@@ -52,6 +53,10 @@ struct SkinPartJson {
     #[serde(default)]
     text_input_draw: Option<TextInputDrawJson>,
     #[serde(default)]
+    directory_picker_draw: Option<DirectoryPickerDrawJson>,
+    #[serde(default)]
+    file_picker_draw: Option<FilePickerDrawJson>,
+    #[serde(default)]
     scrollbar: Option<ScrollbarDrawJson>,
     #[serde(default)]
     hit: Option<PartHitJson>,
@@ -77,6 +82,8 @@ struct SkinPartJson {
     content_height: Option<u32>,
     #[serde(default)]
     child: Option<Box<SkinPartJson>>,
+    #[serde(default)]
+    filter: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -100,6 +107,27 @@ struct ScrollbarDrawJson {
     width: u32,
     track: String,
     thumb: String,
+}
+
+#[derive(Deserialize)]
+struct DirectoryPickerDrawJson {
+    normal: String,
+    hover: String,
+    button_normal: String,
+    button_hover: String,
+}
+
+#[derive(Deserialize)]
+struct FilePickerDrawJson {
+    picker_normal: String,
+    picker_hover: String,
+    picker_btn_normal: String,
+    picker_btn_hover: String,
+    track: String,
+    thumb: String,
+    item_normal: String,
+    item_hover: String,
+    item_selected: String,
 }
 
 #[derive(Deserialize)]
@@ -152,6 +180,8 @@ impl Skin {
             "text_input" => PartType::TextInput,
             "static_text" => PartType::StaticText,
             "vscroll_container" => PartType::VScrollContainer,
+            "directory_picker" => PartType::DirectoryPicker,
+            "file_picker" => PartType::FilePicker,
             other => return Err(SkinError::InvalidPartType(other.to_string())),
         };
 
@@ -166,6 +196,25 @@ impl Skin {
             hover: d.hover,
             focused: d.focused,
             invalid: d.invalid,
+        });
+
+        let directory_picker_draw = p.directory_picker_draw.map(|d| DirectoryPickerDraw {
+            normal: d.normal,
+            hover: d.hover,
+            button_normal: d.button_normal,
+            button_hover: d.button_hover,
+        });
+
+        let file_picker_draw = p.file_picker_draw.map(|d| FilePickerDraw {
+            picker_normal: d.picker_normal,
+            picker_hover: d.picker_hover,
+            picker_btn_normal: d.picker_btn_normal,
+            picker_btn_hover: d.picker_btn_hover,
+            track: d.track,
+            thumb: d.thumb,
+            item_normal: d.item_normal,
+            item_hover: d.item_hover,
+            item_selected: d.item_selected,
         });
 
         let scrollbar = p.scrollbar.map(|s| ScrollbarDraw {
@@ -227,6 +276,8 @@ impl Skin {
             z: p.z,
             draw,
             text_input_draw,
+            directory_picker_draw,
+            file_picker_draw,
             scrollbar,
             hit,
             action: p.action,
@@ -241,6 +292,7 @@ impl Skin {
             binding: p.binding,
             content_height: p.content_height,
             child,
+            filter: p.filter,
         })
     }
 }
