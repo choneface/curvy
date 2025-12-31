@@ -84,6 +84,8 @@ struct SkinPartJson {
     child: Option<Box<SkinPartJson>>,
     #[serde(default)]
     filter: Option<String>,
+    #[serde(default)]
+    on_select: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -293,6 +295,7 @@ impl Skin {
             content_height: p.content_height,
             child,
             filter: p.filter,
+            on_select: p.on_select,
         })
     }
 }

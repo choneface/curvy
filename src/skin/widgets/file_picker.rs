@@ -80,6 +80,15 @@ pub struct FilePicker {
     picker_btn_hovered: bool,
     /// Whether mouse is over the picker area.
     picker_hovered: bool,
+
+    /// Action to trigger when a file is selected.
+    on_select: Option<String>,
+    /// Flag indicating a selection was just made (pending action).
+    pending_action: bool,
+    /// Last known mouse Y position for click detection.
+    last_mouse_y: i32,
+    /// Current bounds for hit testing.
+    current_bounds: Option<Rect>,
 }
 
 impl FilePicker {
@@ -129,6 +138,10 @@ impl FilePicker {
             dialog_title: "Select Directory".to_string(),
             picker_btn_hovered: false,
             picker_hovered: false,
+            on_select: None,
+            pending_action: false,
+            last_mouse_y: 0,
+            current_bounds: None,
         }
     }
 
@@ -168,9 +181,30 @@ impl FilePicker {
         self
     }
 
+    /// Set the on_select action.
+    pub fn with_on_select(mut self, action: impl Into<String>) -> Self {
+        self.on_select = Some(action.into());
+        self
+    }
+
     /// Get the binding key.
     pub fn binding(&self) -> Option<&str> {
         self.binding.as_deref()
+    }
+
+    /// Get the on_select action name.
+    pub fn on_select_action(&self) -> Option<&str> {
+        self.on_select.as_deref()
+    }
+
+    /// Check if there's a pending action (file was just selected).
+    pub fn has_pending_action(&self) -> bool {
+        self.pending_action
+    }
+
+    /// Clear the pending action flag.
+    pub fn clear_pending_action(&mut self) {
+        self.pending_action = false;
     }
 
     /// Get the selected file path (if any).
@@ -469,6 +503,9 @@ impl FilePicker {
 
 impl Widget for FilePicker {
     fn draw(&self, canvas: &mut Canvas, bounds: &Rect, _state: WidgetState) {
+        // Store bounds for hit testing (need interior mutability workaround)
+        // We'll use the bounds passed to draw for reference in click handling
+
         // Draw picker area
         self.draw_picker(canvas, bounds);
 
@@ -486,10 +523,28 @@ impl Widget for FilePicker {
     fn on_event(&mut self, event: &WidgetEvent) -> bool {
         match event {
             WidgetEvent::Click => {
-                // Handle click on picker button or list item
-                // For now, always open dialog on click
-                // TODO: Track click position to differentiate
-                self.open_dialog();
+                // Use stored bounds and mouse position to determine what was clicked
+                if let Some(bounds) = self.current_bounds {
+                    let picker_bottom = bounds.y + self.picker_height as i32;
+
+                    if self.last_mouse_y < picker_bottom {
+                        // Clicked on picker area - open directory dialog
+                        self.open_dialog();
+                    } else {
+                        // Clicked on list area - select item
+                        let list_y = self.last_mouse_y - picker_bottom;
+                        let adjusted_y = list_y + self.scroll_y as i32;
+                        let index = adjusted_y / self.item_height as i32;
+
+                        if index >= 0 && (index as usize) < self.entries.len() {
+                            self.selected_index = Some(index as usize);
+                            self.pending_action = true;
+                        }
+                    }
+                } else {
+                    // No bounds stored, fall back to opening dialog
+                    self.open_dialog();
+                }
                 true
             }
             WidgetEvent::MouseWheel { delta_y } => {
@@ -500,8 +555,40 @@ impl Widget for FilePicker {
                     false
                 }
             }
-            WidgetEvent::MouseMove { x: _, y: _ } => {
-                // TODO: Update hover states based on position
+            WidgetEvent::MouseMove { x, y } => {
+                // Store mouse position for click detection
+                self.last_mouse_y = *y;
+
+                // Update current bounds based on widget position
+                // The y position tells us where the mouse is relative to the widget
+                // We can infer bounds from the mouse position and widget dimensions
+                if self.current_bounds.is_none() {
+                    // Estimate bounds from mouse position (will be refined on first move)
+                    self.current_bounds = Some(Rect::new(
+                        *x - (*x % self.width as i32),
+                        *y - *y,  // This will be corrected as we move
+                        self.width,
+                        self.height,
+                    ));
+                }
+
+                // Update hovered index for list items
+                if let Some(bounds) = self.current_bounds {
+                    let picker_bottom = bounds.y + self.picker_height as i32;
+                    if *y >= picker_bottom && *y < bounds.y + self.height as i32 {
+                        let list_y = *y - picker_bottom;
+                        let adjusted_y = list_y + self.scroll_y as i32;
+                        let index = adjusted_y / self.item_height as i32;
+                        if index >= 0 && (index as usize) < self.entries.len() {
+                            self.hovered_index = Some(index as usize);
+                        } else {
+                            self.hovered_index = None;
+                        }
+                    } else {
+                        self.hovered_index = None;
+                    }
+                }
+
                 false
             }
             _ => false,
@@ -514,5 +601,9 @@ impl Widget for FilePicker {
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
+    }
+
+    fn set_bounds(&mut self, bounds: Rect) {
+        self.current_bounds = Some(bounds);
     }
 }

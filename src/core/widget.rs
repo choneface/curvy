@@ -54,6 +54,10 @@ pub trait Widget {
         false
     }
 
+    /// Called when the widget's bounds are set or updated.
+    /// Widgets that need to track their bounds for hit testing can override this.
+    fn set_bounds(&mut self, _bounds: Rect) {}
+
     /// Return self as Any for downcasting.
     fn as_any(&self) -> &dyn Any;
 

@@ -274,6 +274,9 @@ impl SkinBuilder {
                 if let Some(binding) = &part.binding {
                     picker = picker.with_binding(binding.clone());
                 }
+                if let Some(on_select) = &part.on_select {
+                    picker = picker.with_on_select(on_select.clone());
+                }
 
                 Ok(Box::new(picker))
             }

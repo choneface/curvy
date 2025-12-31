@@ -1,10 +1,12 @@
 use std::path::PathBuf;
+use std::process::Command;
 
 use clap::{Parser, Subcommand};
 use crix::{
     run, init_font, Action, ActionDispatcher, App, AppBundle, KeyCode,
     LuaActionHandler, RunConfig, Services, SkinBuilder, StaticText,
     Store, TextInput, UiTree, View, WidgetEvent,
+    skin::widgets::FilePicker,
 };
 use winit::event::WindowEvent;
 use winit::keyboard::{Key, NamedKey};
@@ -131,6 +133,55 @@ impl SkinApp {
         }
         None
     }
+
+    /// Check for FilePicker pending actions and handle them.
+    fn handle_file_picker_actions(&mut self) {
+        let node_ids: Vec<_> = self.tree.iter_node_ids().collect();
+
+        for id in node_ids {
+            if let Some(node) = self.tree.get_mut(id) {
+                if let Some(picker) = node.widget_mut().as_any_mut().downcast_mut::<FilePicker>() {
+                    if picker.has_pending_action() {
+                        if let Some(action) = picker.on_select_action() {
+                            if action == "launch_child_app" {
+                                if let Some(path) = picker.selected_file().cloned() {
+                                    picker.clear_pending_action();
+                                    launch_child_app(&path);
+                                }
+                            } else {
+                                // Handle other actions through dispatcher
+                                picker.clear_pending_action();
+                                // Could dispatch to Lua handler here
+                            }
+                        }
+                        picker.clear_pending_action();
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Launch a child crix app in a new process.
+fn launch_child_app(path: &PathBuf) {
+    println!("Launching app: {}", path.display());
+
+    // Get the path to the current executable
+    let exe = std::env::current_exe().expect("Failed to get current executable path");
+
+    // Spawn a new process to run the child app
+    match Command::new(&exe)
+        .arg("run")
+        .arg(path)
+        .spawn()
+    {
+        Ok(child) => {
+            println!("Launched child process with PID: {}", child.id());
+        }
+        Err(e) => {
+            eprintln!("Failed to launch app: {}", e);
+        }
+    }
 }
 
 impl App for SkinApp {
@@ -141,8 +192,17 @@ impl App for SkinApp {
     fn on_event(&mut self, event: &WindowEvent) -> bool {
         match event {
             WindowEvent::CursorMoved { position, .. } => {
-                let hit = self.tree.hit_test(position.x as i32, position.y as i32);
+                let x = position.x as i32;
+                let y = position.y as i32;
+                let hit = self.tree.hit_test(x, y);
                 self.tree.set_hovered(hit);
+
+                // Send MouseMove event to hovered widget for position tracking
+                if let Some(hovered_id) = hit {
+                    if let Some(node) = self.tree.get_mut(hovered_id) {
+                        node.widget_mut().on_event(&WidgetEvent::MouseMove { x, y });
+                    }
+                }
                 true
             }
             WindowEvent::MouseInput { state, .. } => {
@@ -189,6 +249,9 @@ impl App for SkinApp {
                                 if let Some(node) = self.tree.get_mut(pressed_id) {
                                     node.widget_mut().on_event(&WidgetEvent::Click);
                                 }
+
+                                // Handle file picker actions (must be after click event)
+                                self.handle_file_picker_actions();
 
                                 // Dispatch action if this was a button
                                 if let Some(action_name) = action {

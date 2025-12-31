@@ -57,6 +57,7 @@
       "text_color": "0xDDDDDD",
       "padding": 12,
       "binding": "selected_app",
+      "on_select": "launch_child_app",
       "file_picker_draw": {
         "picker_normal": "picker_normal",
         "picker_hover": "picker_hover",

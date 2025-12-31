@@ -170,6 +170,8 @@ pub struct SkinPart {
     pub child: Option<Box<SkinPart>>,
     /// Filter string for file pickers (e.g., ".crix")
     pub filter: Option<String>,
+    /// Action to trigger on file selection
+    pub on_select: Option<String>,
 }
 
 /// The root skin structure parsed from skin.toml.

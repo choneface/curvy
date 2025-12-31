@@ -127,6 +127,7 @@ impl UiTree {
     pub fn set_bounds(&mut self, id: NodeId, bounds: Rect) {
         if let Some(node) = self.get_mut(id) {
             node.bounds = bounds;
+            node.widget.set_bounds(bounds);
         }
     }
 
