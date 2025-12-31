@@ -19,7 +19,11 @@
     "scrollbar_thumb": "images/scrollbar_thumb.png",
     "item_normal": "images/item_normal.png",
     "item_hover": "images/item_hover.png",
-    "item_selected": "images/item_selected.png"
+    "item_selected": "images/item_selected.png",
+    "detail_panel": "images/detail_panel.png",
+    "run_btn_normal": "images/run_btn_normal.png",
+    "run_btn_hover": "images/run_btn_hover.png",
+    "run_btn_pressed": "images/run_btn_pressed.png"
   },
   "parts": [
     {
@@ -50,14 +54,14 @@
       "type": "file_picker",
       "x": 16,
       "y": 70,
-      "width": 1068,
+      "width": 520,
       "height": 714,
       "z": 1,
       "filter": ".crix",
       "text_color": "0xDDDDDD",
       "padding": 12,
       "binding": "selected_app",
-      "on_select": "launch_child_app",
+      "on_select": "load_app_info",
       "file_picker_draw": {
         "picker_normal": "picker_normal",
         "picker_hover": "picker_hover",
@@ -68,6 +72,139 @@
         "item_normal": "item_normal",
         "item_hover": "item_hover",
         "item_selected": "item_selected"
+      }
+    },
+    {
+      "id": "detail_panel",
+      "type": "image",
+      "asset": "detail_panel",
+      "x": 552,
+      "y": 70,
+      "width": 532,
+      "height": 660,
+      "z": 1
+    },
+    {
+      "id": "label_name",
+      "type": "static_text",
+      "x": 572,
+      "y": 90,
+      "width": 100,
+      "height": 28,
+      "z": 2,
+      "content": "Name:",
+      "font_size": 16.0,
+      "text_color": "0x888888",
+      "text_align": "left"
+    },
+    {
+      "id": "value_name",
+      "type": "static_text",
+      "x": 572,
+      "y": 118,
+      "width": 492,
+      "height": 32,
+      "z": 2,
+      "content": "",
+      "font_size": 20.0,
+      "text_color": "0xFFFFFF",
+      "text_align": "left",
+      "binding": "app_name"
+    },
+    {
+      "id": "label_version",
+      "type": "static_text",
+      "x": 572,
+      "y": 166,
+      "width": 100,
+      "height": 28,
+      "z": 2,
+      "content": "Version:",
+      "font_size": 16.0,
+      "text_color": "0x888888",
+      "text_align": "left"
+    },
+    {
+      "id": "value_version",
+      "type": "static_text",
+      "x": 572,
+      "y": 194,
+      "width": 492,
+      "height": 28,
+      "z": 2,
+      "content": "",
+      "font_size": 16.0,
+      "text_color": "0xDDDDDD",
+      "text_align": "left",
+      "binding": "app_version"
+    },
+    {
+      "id": "label_author",
+      "type": "static_text",
+      "x": 572,
+      "y": 238,
+      "width": 100,
+      "height": 28,
+      "z": 2,
+      "content": "Author:",
+      "font_size": 16.0,
+      "text_color": "0x888888",
+      "text_align": "left"
+    },
+    {
+      "id": "value_author",
+      "type": "static_text",
+      "x": 572,
+      "y": 266,
+      "width": 492,
+      "height": 28,
+      "z": 2,
+      "content": "",
+      "font_size": 16.0,
+      "text_color": "0xDDDDDD",
+      "text_align": "left",
+      "binding": "app_author"
+    },
+    {
+      "id": "label_description",
+      "type": "static_text",
+      "x": 572,
+      "y": 310,
+      "width": 100,
+      "height": 28,
+      "z": 2,
+      "content": "Description:",
+      "font_size": 16.0,
+      "text_color": "0x888888",
+      "text_align": "left"
+    },
+    {
+      "id": "value_description",
+      "type": "static_text",
+      "x": 572,
+      "y": 338,
+      "width": 492,
+      "height": 120,
+      "z": 2,
+      "content": "",
+      "font_size": 16.0,
+      "text_color": "0xDDDDDD",
+      "text_align": "left",
+      "binding": "app_description"
+    },
+    {
+      "id": "run_button",
+      "type": "button",
+      "x": 900,
+      "y": 740,
+      "width": 160,
+      "height": 44,
+      "z": 2,
+      "action": "launch_selected_app",
+      "draw": {
+        "normal": "run_btn_normal",
+        "hover": "run_btn_hover",
+        "pressed": "run_btn_pressed"
       }
     }
   ]

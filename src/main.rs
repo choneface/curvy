@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 
@@ -8,8 +9,34 @@ use crix::{
     Store, TextInput, UiTree, View, WidgetEvent,
     skin::widgets::FilePicker,
 };
+use serde::Deserialize;
 use winit::event::WindowEvent;
 use winit::keyboard::{Key, NamedKey};
+
+/// Lightweight app metadata parsed from app.toml for display.
+#[derive(Debug, Deserialize)]
+struct AppTomlMeta {
+    app: AppMetaSection,
+}
+
+#[derive(Debug, Deserialize)]
+struct AppMetaSection {
+    name: String,
+    #[serde(default)]
+    version: String,
+    #[serde(default)]
+    author: String,
+    #[serde(default)]
+    description: String,
+}
+
+/// Load app metadata from a .crix bundle's app.toml.
+fn load_app_metadata(bundle_path: &PathBuf) -> Option<AppMetaSection> {
+    let toml_path = bundle_path.join("app.toml");
+    let content = fs::read_to_string(&toml_path).ok()?;
+    let parsed: AppTomlMeta = toml::from_str(&content).ok()?;
+    Some(parsed.app)
+}
 
 /// Crix - A skinnable UI framework
 #[derive(Parser)]
@@ -136,27 +163,74 @@ impl SkinApp {
 
     /// Check for FilePicker pending actions and handle them.
     fn handle_file_picker_actions(&mut self) {
-        let node_ids: Vec<_> = self.tree.iter_node_ids().collect();
+        // Collect pending actions first to avoid borrow conflicts
+        let mut actions_to_process: Vec<(String, PathBuf)> = Vec::new();
 
+        let node_ids: Vec<_> = self.tree.iter_node_ids().collect();
         for id in node_ids {
             if let Some(node) = self.tree.get_mut(id) {
                 if let Some(picker) = node.widget_mut().as_any_mut().downcast_mut::<FilePicker>() {
                     if picker.has_pending_action() {
                         if let Some(action) = picker.on_select_action() {
-                            if action == "launch_child_app" {
-                                if let Some(path) = picker.selected_file().cloned() {
-                                    picker.clear_pending_action();
-                                    launch_child_app(&path);
-                                }
-                            } else {
-                                // Handle other actions through dispatcher
-                                picker.clear_pending_action();
-                                // Could dispatch to Lua handler here
+                            if let Some(path) = picker.selected_file().cloned() {
+                                actions_to_process.push((action.to_string(), path));
                             }
                         }
                         picker.clear_pending_action();
                     }
                 }
+            }
+        }
+
+        // Now process the collected actions
+        for (action, path) in actions_to_process {
+            match action.as_str() {
+                "launch_child_app" => {
+                    launch_child_app(&path);
+                }
+                "load_app_info" => {
+                    self.load_app_info_to_store(&path);
+                }
+                _ => {
+                    // Could dispatch to Lua handler here
+                }
+            }
+        }
+    }
+
+    /// Load app metadata from a .crix bundle and populate the store.
+    fn load_app_info_to_store(&mut self, path: &PathBuf) {
+        // Store the selected path
+        self.store.set("selected_app_path".to_string(), path.to_string_lossy().to_string());
+
+        // Try to load and parse app.toml
+        if let Some(meta) = load_app_metadata(path) {
+            self.store.set("app_name".to_string(), meta.name);
+            self.store.set("app_version".to_string(), meta.version);
+            self.store.set("app_author".to_string(), meta.author);
+            self.store.set("app_description".to_string(), meta.description);
+        } else {
+            // Clear metadata if parsing failed
+            let dir_name = path.file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_default();
+            self.store.set("app_name".to_string(), dir_name);
+            self.store.set("app_version".to_string(), "".to_string());
+            self.store.set("app_author".to_string(), "".to_string());
+            self.store.set("app_description".to_string(), "(Could not read app.toml)".to_string());
+        }
+
+        // Sync the store values to StaticText widgets
+        self.sync_store_to_outputs();
+    }
+
+    /// Handle the launch_selected_app action (triggered by Run button).
+    fn handle_launch_selected_app(&mut self) {
+        let path_str = self.store.get_string("selected_app_path");
+        if !path_str.is_empty() {
+            let path = PathBuf::from(path_str);
+            if path.exists() && path.is_dir() {
+                launch_child_app(&path);
             }
         }
     }
@@ -257,8 +331,15 @@ impl App for SkinApp {
                                 if let Some(action_name) = action {
                                     // Sync inputs first
                                     self.sync_inputs_to_store();
-                                    // Dispatch the action
-                                    self.dispatch_action(&action_name);
+
+                                    // Handle built-in actions
+                                    if action_name == "launch_selected_app" {
+                                        self.handle_launch_selected_app();
+                                    } else {
+                                        // Dispatch the action to Lua handler
+                                        self.dispatch_action(&action_name);
+                                    }
+
                                     // Sync outputs after action
                                     self.sync_store_to_outputs();
                                 }
