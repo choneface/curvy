@@ -4,9 +4,9 @@ use std::path::Path;
 use serde::Deserialize;
 
 use super::types::{
-    DirectoryPickerDraw, FilePickerDraw, HitType, PartDraw, PartHit, PartType, ScrollbarDraw,
-    Skin, SkinError, SkinMeta, SkinPart, SkinWindow, TextAlign, TextInputDraw, TextValidation,
-    VerticalAlign,
+    CheckboxDraw, DirectoryPickerDraw, FilePickerDraw, HitType, PartDraw, PartHit, PartType,
+    ScrollbarDraw, Skin, SkinError, SkinMeta, SkinPart, SkinWindow, TextAlign, TextInputDraw,
+    TextValidation, VerticalAlign,
 };
 
 #[derive(Deserialize)]
@@ -57,6 +57,8 @@ struct SkinPartJson {
     #[serde(default)]
     file_picker_draw: Option<FilePickerDrawJson>,
     #[serde(default)]
+    checkbox_draw: Option<CheckboxDrawJson>,
+    #[serde(default)]
     scrollbar: Option<ScrollbarDrawJson>,
     #[serde(default)]
     hit: Option<PartHitJson>,
@@ -72,6 +74,8 @@ struct SkinPartJson {
     validation: Option<String>,
     #[serde(default)]
     content: Option<String>,
+    #[serde(default)]
+    label: Option<String>,
     #[serde(default)]
     text_align: Option<String>,
     #[serde(default)]
@@ -133,6 +137,12 @@ struct FilePickerDrawJson {
 }
 
 #[derive(Deserialize)]
+struct CheckboxDrawJson {
+    unchecked: String,
+    checked: String,
+}
+
+#[derive(Deserialize)]
 struct PartHitJson {
     #[serde(rename = "type")]
     hit_type: String,
@@ -184,6 +194,7 @@ impl Skin {
             "vscroll_container" => PartType::VScrollContainer,
             "directory_picker" => PartType::DirectoryPicker,
             "file_picker" => PartType::FilePicker,
+            "checkbox" => PartType::Checkbox,
             other => return Err(SkinError::InvalidPartType(other.to_string())),
         };
 
@@ -217,6 +228,11 @@ impl Skin {
             item_normal: d.item_normal,
             item_hover: d.item_hover,
             item_selected: d.item_selected,
+        });
+
+        let checkbox_draw = p.checkbox_draw.map(|d| CheckboxDraw {
+            unchecked: d.unchecked,
+            checked: d.checked,
         });
 
         let scrollbar = p.scrollbar.map(|s| ScrollbarDraw {
@@ -280,6 +296,7 @@ impl Skin {
             text_input_draw,
             directory_picker_draw,
             file_picker_draw,
+            checkbox_draw,
             scrollbar,
             hit,
             action: p.action,
@@ -289,6 +306,7 @@ impl Skin {
             max_length: p.max_length,
             validation,
             content: p.content,
+            label: p.label,
             text_align,
             vertical_align,
             binding: p.binding,

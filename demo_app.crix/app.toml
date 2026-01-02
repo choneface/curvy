@@ -20,3 +20,4 @@ size = 16.0
 [actions]
 # Maps action names (triggered by buttons) to Lua scripts
 calculate_blend = "scripts/calculate_blend.lua"
+handle_imperial_toggle = "scripts/handle_imperial_toggle.lua"

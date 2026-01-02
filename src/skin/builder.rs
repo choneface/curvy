@@ -3,7 +3,7 @@ use crate::widgets::Container;
 
 use super::assets::LoadedSkin;
 use super::types::{PartType, SkinError, SkinPart, SkinWindow};
-use super::widgets::{DirectoryPicker, FilePicker, SkinButton, SkinImage, SkinVScroll, StaticText, TextInput};
+use super::widgets::{Checkbox, DirectoryPicker, FilePicker, SkinButton, SkinImage, SkinVScroll, StaticText, TextInput};
 
 /// Builds a UiTree from a loaded skin.
 pub struct SkinBuilder;
@@ -279,6 +279,42 @@ impl SkinBuilder {
                 }
 
                 Ok(Box::new(picker))
+            }
+            PartType::Checkbox => {
+                let draw = part
+                    .checkbox_draw
+                    .as_ref()
+                    .ok_or_else(|| SkinError::MissingDrawSection(part.id.clone()))?;
+
+                let unchecked = skin
+                    .get_image(&draw.unchecked)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.unchecked.clone()))?;
+                let checked = skin
+                    .get_image(&draw.checked)
+                    .ok_or_else(|| SkinError::AssetNotFound(draw.checked.clone()))?;
+
+                let mut checkbox = Checkbox::new(unchecked.clone(), checked.clone());
+
+                if let Some(ref label) = part.label {
+                    checkbox = checkbox.with_label(label.clone());
+                }
+                if let Some(color) = part.text_color {
+                    checkbox = checkbox.with_text_color(color);
+                }
+                if let Some(size) = part.font_size {
+                    checkbox = checkbox.with_font_size(size);
+                }
+                if let Some(padding) = part.padding {
+                    checkbox = checkbox.with_padding(padding);
+                }
+                if let Some(binding) = &part.binding {
+                    checkbox = checkbox.with_binding(binding.clone());
+                }
+                if let Some(action) = &part.action {
+                    checkbox = checkbox.with_action(action.clone());
+                }
+
+                Ok(Box::new(checkbox))
             }
         }
     }

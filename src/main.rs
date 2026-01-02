@@ -7,7 +7,7 @@ use crix::{
     run, init_font, Action, ActionDispatcher, App, AppBundle, KeyCode,
     LuaActionHandler, RunConfig, Services, SkinBuilder, StaticText,
     Store, TextInput, UiTree, View, WidgetEvent,
-    skin::widgets::FilePicker,
+    skin::widgets::{Checkbox, FilePicker},
 };
 use serde::Deserialize;
 use winit::event::WindowEvent;
@@ -124,6 +124,24 @@ impl SkinApp {
         }
     }
 
+    /// Sync checkboxes to store (write dirty values).
+    fn sync_checkboxes_to_store(&mut self) {
+        let node_ids: Vec<_> = self.tree.iter_node_ids().collect();
+
+        for id in node_ids {
+            if let Some(node) = self.tree.get_mut(id) {
+                if let Some(checkbox) = node.widget_mut().as_any_mut().downcast_mut::<Checkbox>() {
+                    if checkbox.is_dirty() {
+                        if let Some(binding) = checkbox.binding() {
+                            self.store.set(binding.to_string(), checkbox.is_checked());
+                        }
+                        checkbox.clear_dirty();
+                    }
+                }
+            }
+        }
+    }
+
     /// Sync store values to static text widgets (update displays).
     fn sync_store_to_outputs(&mut self) {
         let node_ids: Vec<_> = self.tree.iter_node_ids().collect();
@@ -234,6 +252,36 @@ impl SkinApp {
             }
         }
     }
+
+    /// Handle checkbox actions for the currently pressed widget.
+    fn handle_checkbox_actions(&mut self) {
+        if let Some(pressed_id) = self.tree.pressed() {
+            // Get the action from the checkbox if it is one
+            let action = {
+                if let Some(node) = self.tree.get(pressed_id) {
+                    if let Some(checkbox) = node.widget().as_any().downcast_ref::<Checkbox>() {
+                        checkbox.action().map(|s| s.to_string())
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            };
+
+            // Dispatch the action if present
+            if let Some(action_name) = action {
+                // Sync inputs first (in case checkbox state affects calculations)
+                self.sync_inputs_to_store();
+
+                // Dispatch the action
+                self.dispatch_action(&action_name);
+
+                // Sync outputs after action
+                self.sync_store_to_outputs();
+            }
+        }
+    }
 }
 
 /// Launch a child crix app in a new process.
@@ -323,6 +371,12 @@ impl App for SkinApp {
                                 if let Some(node) = self.tree.get_mut(pressed_id) {
                                     node.widget_mut().on_event(&WidgetEvent::Click);
                                 }
+
+                                // Sync checkboxes after click (they toggle on click)
+                                self.sync_checkboxes_to_store();
+
+                                // Handle checkbox actions (dispatch if checkbox has an action)
+                                self.handle_checkbox_actions();
 
                                 // Handle file picker actions (must be after click event)
                                 self.handle_file_picker_actions();

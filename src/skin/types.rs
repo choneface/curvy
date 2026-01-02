@@ -74,6 +74,15 @@ pub struct FilePickerDraw {
     pub item_selected: String,
 }
 
+/// Checkbox drawing configuration.
+#[derive(Debug, Clone)]
+pub struct CheckboxDraw {
+    /// Unchecked state image.
+    pub unchecked: String,
+    /// Checked state image.
+    pub checked: String,
+}
+
 /// Hit testing configuration.
 #[derive(Debug, Clone)]
 pub struct PartHit {
@@ -114,6 +123,7 @@ pub enum PartType {
     VScrollContainer,
     DirectoryPicker,
     FilePicker,
+    Checkbox,
 }
 
 /// Validation mode for text input.
@@ -145,6 +155,7 @@ pub struct SkinPart {
     pub text_input_draw: Option<TextInputDraw>,
     pub directory_picker_draw: Option<DirectoryPickerDraw>,
     pub file_picker_draw: Option<FilePickerDraw>,
+    pub checkbox_draw: Option<CheckboxDraw>,
     pub scrollbar: Option<ScrollbarDraw>,
     pub hit: Option<PartHit>,
     pub action: Option<String>,
@@ -158,6 +169,8 @@ pub struct SkinPart {
     pub validation: Option<TextValidation>,
     /// Static text content
     pub content: Option<String>,
+    /// Label text for checkboxes
+    pub label: Option<String>,
     /// Horizontal text alignment
     pub text_align: Option<TextAlign>,
     /// Vertical text alignment
